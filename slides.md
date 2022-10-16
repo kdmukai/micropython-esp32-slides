@@ -3,7 +3,7 @@
 theme: seriph
 # random image from a curated Unsplash collection by Anthony
 # like them? see https://unsplash.com/collections/94734566/slidev
-background: https://source.unsplash.com/collection/94734566/1920x1080
+# background: https://source.unsplash.com/collection/94734566/1920x1080
 # apply any windi css classes to the current slide
 class: 'text-center'
 # https://sli.dev/custom/highlighters.html
@@ -33,7 +33,7 @@ canvasWidth: 800
 ## @KeithMukai
 
 <div class="absolute bottom-30px">
-Hardware sponsored by <img src="bitcoin_magazine_logo.png" class="w-50">
+Hardware sponsored by <img src="bitcoin_magazine_logo_white.png" class="w-50">
 </div>
 <!--
 The last comment block of each slide will be treated as slide notes. It will be visible and editable in Presenter Mode along with the slide. [Read more in the docs](https://sli.dev/guide/syntax.html#notes)
@@ -46,21 +46,25 @@ The last comment block of each slide will be treated as slide notes. It will be 
 ### A basic platform for your own DIY Bitcoin project
 <br/>
 
-* Cheap, easily-sourced microcontroller (esp32-S2)
+<img src="build_complete_01.jpg" class="w-75" style="float: right;">
+
+* Cheap, easily-sourced microcontroller
+* Hardware inputs, display, camera
 * Coder-friendly MicroPython
-* `secp256k1` baked in
-* @StepanSnigirev's `embit` Bitcoin library onboard
-* LVGL UI layer
+* Bitcoin libraries onboard
+* "Advanced" UI rendering library
 
 ---
 
 # The workshop plan
 
+<img src="kit_components.jpg" class="w-50" style="float: right;">
+
 <br/>
 
 * Phase I: Overview (this presentation)
 * Phase II: You go off & assemble on your own time
-* Phase III: Find me at the SeedSigner table to help you debug, brainstorm project ideas, etc.
+* Phase III: Find me at the SeedSigner table to help debug, brainstorm project ideas, etc.
 
 ---
 
@@ -82,7 +86,7 @@ The last comment block of each slide will be treated as slide notes. It will be 
 * But lighter, meant for embedded devices
 * Compiled/Optimized for each platform
 * Live interactive REPL
-* Trezor, Coldcard, Passport, Specter-DIY
+* Trezor, Coldcard, Passport, Specter-DIY, Krux
 
 ---
 
@@ -195,7 +199,7 @@ layout: two-cols
 
 * Not pythonic at all
 * Closer to CSS implemented as C structs
-* Docs are somehow thorough and not useful
+* Docs are somehow thorough yet not useful
 * Must compile from their fork of MicroPython: `lv_micropython`
 
 ::right::
@@ -237,22 +241,10 @@ Lots of pieces:
 
 ---
 
-# Configure and build within Docker
+# Managing all the pieces
 
-```docker
-# Get ESP-IDF compiler for esp32
-WORKDIR /root/home
-RUN mkdir -p esp
-WORKDIR /root/home/esp
-RUN git clone -b v4.4.1 --recursive https://github.com/espressif/esp-idf.git
-WORKDIR /root/home/esp/esp-idf
-RUN ./install.sh esp32,esp32s2,esp32s3
-
-# Add the esp32-camera driver
-WORKDIR /root/home/esp/esp-idf/components
-RUN git clone -b v2.0.2 https://github.com/espressif/esp32-camera.git
-...
-```
+* One main git repo to gather dependencies
+* Compile within a Docker container
 
 ---
 
@@ -267,6 +259,26 @@ RUN git clone -b v2.0.2 https://github.com/espressif/esp32-camera.git
 </div>
 
 ---
+
+# The Hardware
+
+## Inventory check
+<img src="kit_components.jpg" class="w-100" style="float: right;">
+
+<br/>
+
+* ESP32-S2 Saola-1R
+* Waveshare LCD hat
+* 40-pin gpio adapter
+* Alcohol wipe
+* OV2640 camera module
+* gpio expander board (not needed)
+* Full- & half-size breadboard
+* 15 male-to-male jumpers
+* 16 male-to-female jumpers
+
+---
+
 
 # The Hardware
 
@@ -376,6 +388,26 @@ RUN git clone -b v2.0.2 https://github.com/espressif/esp32-camera.git
 
 ---
 
+# Waveshare OV2640 camera board
+
+<img src="ov2640.jpg" class="h-50" style="float: right;">
+
+<br/>
+
+* Ubiquitous workhorse
+* Jumper wire connection is iffy
+
+---
+
+# Solderless breadboards
+
+<br/>
+
+<img src="solderless_breadboards_2.jpg" class="h-50" style="float: right; margin: 10px;">
+<img src="solderless_breadboards_1.jpg" class="h-50" style="float: right; margin: 10px;">
+
+---
+
 # Writing the firmware to the board
 
 <br/>
@@ -401,10 +433,10 @@ esptool.py -p /dev/tty.usbserial-1110 -b 460800 --before default_reset --chip es
 
 ```bash
 # List the files on the board
-ampy -p /dev/tty.usbmodem1234561 ls
+ampy -p /dev/tty.usbserial-1110 ls
 
 # Transfer a file
-ampy -p /dev/tty.usbmodem1234561 put demos/fonts/opensans_regular_17.bin
+ampy -p /dev/tty.usbserial-1110 put demos/fonts/opensans_regular_17.bin
 ```
 
 ---
@@ -414,8 +446,84 @@ ampy -p /dev/tty.usbmodem1234561 put demos/fonts/opensans_regular_17.bin
 <br/>
 
 ```bash
-mpremote connect /dev/tty.usbmodem1234561 run demos/secp256k1_test.py
+mpremote connect /dev/tty.usbserial-1110 run demos/secp256k1_test.py
 ```
 
 ---
 
+# Demos!
+
+<br/>
+
+* `micropython-esp32/demos`
+
+---
+
+# Caveats / Limitations
+
+<br/>
+
+* Networking is knocked out for esp32-S2
+* No QR decoder yet
+* Flaky camera
+
+---
+
+# Further Possibilities
+
+<br/>
+
+* Add an NFC reader?
+* SD card reader?
+* Touchscreen?
+* Other microcontrollers
+
+---
+
+# Graduate from solderless breadboards
+
+<img src="build_complete_02.jpg" class="w-50" style="float: right;">
+<img src="build_complete_03.jpg" class="w-50" style="float: right;">
+
+<br/>
+
+* Soldered protoboard
+* Custom PCB
+
+---
+
+# Help with SeedSigner!
+
+<img src="seedsigner_diagram.jpg" class="w-100" style="float: right;">
+
+<br/>
+
+* QR decoder (Quirc?)
+* Fork LVGL's QR encoder
+* Load from SD card
+* eFuse signed firmware
+* Custom pcb
+* Custom C modules
+  * Memory/framebuffer management
+  * Camera + QR decoder + live display
+  * `embit` enhancements
+* Port current Python codebase
+
+---
+
+# What will you build?
+
+<br/>
+
+* Lightning?
+* Decentralized IDs?
+* PGP signer?
+
+<br/>
+
+### Send me updates!
+* @KeithMukai
+* Write an article about your project for Bitcoin Magazine
+
+<br/>
+<img src="bitcoin_magazine_logo_white.png" class="w-50 absolute bottom">
